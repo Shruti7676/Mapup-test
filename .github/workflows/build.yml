@@ -6,6 +6,12 @@ on:
       aws-region:
         required: true
         type: string
+  push:
+    branches:
+          - main
+  pull_request:
+    branches:
+          - main
 
 
 jobs:
