@@ -1,40 +1,39 @@
-name: Docker Build and Push
+name: Docker deploy to ECR
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_call:
+    inputs:
+      aws-region:
+        required: true
+        type: string
+
 
 jobs:
-  build-and-push:
+  build_and_deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v2
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1 # Replace with your AWS region
+          aws-region: ${{inputs.aws-region}}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        run: |
-          echo ${{ secrets.AWS_SECRET_ACCESS_KEY }} | docker login --username AWS --password-stdin public.ecr.aws/949318154035
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build Docker image
+      - name: Build, tag, and push the image to Amazon ECR
         id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: mapup-test
         run: |
-          docker build -t mapup-test:${{ github.sha }} .
-          echo "::set-output name=image_name::mapup-test:${{ github.sha }}"
-
-      - name: Push Docker image to Amazon ECR
-        run: |
-          docker tag ${{ steps.build-image.outputs.image_name }} 949318154035.dkr.ecr.ap-south-1.amazonaws.com/${{ steps.build-image.outputs.image_name }}
-          docker push 949318154035.dkr.ecr.ap-south-1.amazonaws.com/${{ steps.build-image.outputs.image_name }}
+          # Build a docker container and push it to ECR 
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY .
+          echo "Pushing image to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
