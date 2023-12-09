@@ -29,7 +29,7 @@ jobs:
         - name: Build and push the tagged docker image to Amazon ECR
           env:
             ECR_REGISTRY: ${{ steps.login-pf-aws-ecr.outputs.registry }}
-            ECR_REPOSITORY: public.ecr.aws/h0i6d4d5/mapup-test
+            ECR_REPOSITORY: 949318154035.dkr.ecr.ap-south-1.amazonaws.com/mapup-test
             IMAGE_TAG: latest
           run: |
            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
