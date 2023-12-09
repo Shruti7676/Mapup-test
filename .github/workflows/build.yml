@@ -32,5 +32,5 @@ jobs:
             ECR_REPOSITORY: public.ecr.aws/h0i6d4d5/mapup-test
             IMAGE_TAG: latest
           run: |
-            docker build -t mapup-test:latest public.ecr.aws/h0i6d4d5/mapup-test:latest .
-            docker push public.ecr.aws/h0i6d4d5/mapup-test:latest
+           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
