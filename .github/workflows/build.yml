@@ -1,0 +1,40 @@
+name: Docker Build and Push
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: <your-region> # Replace with your AWS region
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        run: |
+          echo ${{ secrets.AWS_SECRET_ACCESS_KEY }} | docker login -u AWS --password-stdin <your-account-id>.dkr.ecr.<your-region>.amazonaws.com
+
+      - name: Build Docker image
+        id: build-image
+        run: |
+          docker build -t <your-image-name>:${{ github.sha }} .
+          echo "::set-output name=image_name::<your-image-name>:${{ github.sha }}"
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker tag ${{ steps.build-image.outputs.image_name }} <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/${{ steps.build-image.outputs.image_name }}
+          docker push <your-account-id>.dkr.ecr.<your-region>.amazonaws.com/${{ steps.build-image.outputs.image_name }}
