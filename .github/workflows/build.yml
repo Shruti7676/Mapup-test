@@ -14,6 +14,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - uses: vitr/actions-build-and-upload-to-ecs@master
 
       - name: Login to AWS ECR
         uses: aws-actions/configure-aws-credentials@v1
