@@ -32,3 +32,4 @@ jobs:
           key: ${{ runner.os }}-build-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-build-
+            ${{ runner.os }}-build-
